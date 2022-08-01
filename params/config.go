@@ -88,8 +88,8 @@ var (
 		},
 	}
 
-	TestChainConfig        = &ChainConfig{big.NewInt(1), DefaultFeeConfig, false, big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), NetworkUpgrades{big.NewInt(0)}, PrecompileUpgrade{}, UpgradeConfig{}, precompile.TestPrecompileConfig{}}
-	TestPreSubnetEVMConfig = &ChainConfig{big.NewInt(1), DefaultFeeConfig, false, big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), NetworkUpgrades{}, PrecompileUpgrade{}, UpgradeConfig{}, precompile.TestPrecompileConfig{}}
+	TestChainConfig        = &ChainConfig{big.NewInt(1), DefaultFeeConfig, false, big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), NetworkUpgrades{big.NewInt(0)}, PrecompileUpgrade{}, UpgradeConfig{}}
+	TestPreSubnetEVMConfig = &ChainConfig{big.NewInt(1), DefaultFeeConfig, false, big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), NetworkUpgrades{}, PrecompileUpgrade{}, UpgradeConfig{}}
 )
 
 // ChainConfig is the core config which determines the blockchain settings.
@@ -120,7 +120,6 @@ type ChainConfig struct {
 	NetworkUpgrades              // Config for timestamps that enable avalanche network upgrades
 	PrecompileUpgrade            // Config for enabling precompiles from genesis
 	UpgradeConfig     `json:"-"` // Config specified in upgradeBytes (avalanche network upgrades or enable/disabling precompiles). Skip encoding/decoding directly into ChainConfig.
-	TestPrecompileConfig	precompile.TestPrecompileConfig   `json:"testPrecompile,omitempty"`  // Config for the contract test precompile
 }
 
 // UpgradeConfig includes the following configs that may be specified in upgradeBytes:
@@ -248,7 +247,8 @@ func (c *ChainConfig) IsTxAllowList(blockTimestamp *big.Int) bool {
 }
 
 func (c *ChainConfig) IsTestPrecompile(blockTimestamp *big.Int) bool {
-	return utils.IsForked(c.TestPrecompileConfig.Timestamp(), blockTimestamp)
+	config := c.GetTestPrecompileConfig(blockTimestamp)
+	return config != nil && !config.Disable
 }
 
 // IsFeeConfigManager returns whether [blockTimestamp] is either equal to the FeeConfigManager fork block timestamp or greater.

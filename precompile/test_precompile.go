@@ -22,6 +22,7 @@ var (
 // TestPrecompileConfig uses it to implement the StatefulPrecompileConfig
 type TestPrecompileConfig struct {
 	BlockTimestamp *big.Int `json:"blockTimestamp"`
+	Disable bool
 }
 
 // Address returns the address of the XChain ECRecover contract.
@@ -58,8 +59,9 @@ func (c *TestPrecompileConfig) Timestamp() *big.Int { return c.BlockTimestamp }
 // getXChainECRecover returns an execution function that reads the input and return the input from the given [precompileAddr].
 // The execution function parses the input into a string and returns the string
 func getTestPrecompile(precompileAddr common.Address) RunStatefulPrecompileFunc {
-	log.Info("Reached 2 1")
+	log.Info("getTestPrecompile initialized")
 	return func(evm PrecompileAccessibleState, callerAddr common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
+		log.Info("getTestPrecompile called inside")
 		//if remainingGas, err = deductGas(suppliedGas, XChainECRecoverCost); err != nil {
 			//return nil, 0, err
 		//}

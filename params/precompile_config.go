@@ -187,6 +187,15 @@ func (c *ChainConfig) GetTxAllowListConfig(blockTimestamp *big.Int) *precompile.
 	return nil
 }
 
+// GetTestPrecompileConfig returns the latest forked TestPrecompileConfig
+// specified by [c] or nil if it was never enabled.
+func (c *ChainConfig) GetTestPrecompileConfig(blockTimestamp *big.Int) *precompile.TestPrecompileConfig {
+	if val := c.getActivePrecompileConfig(blockTimestamp, testPrecompileKey, c.PrecompileUpgrades); val != nil {
+		return val.(*precompile.TestPrecompileConfig)
+	}
+	return nil
+}
+
 // GetFeeConfigManagerConfig returns the latest forked FeeManagerConfig
 // specified by [c] or nil if it was never enabled.
 func (c *ChainConfig) GetFeeConfigManagerConfig(blockTimestamp *big.Int) *precompile.FeeConfigManagerConfig {
