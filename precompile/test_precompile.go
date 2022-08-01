@@ -60,11 +60,11 @@ func (c *TestPrecompileConfig) Timestamp() *big.Int { return c.BlockTimestamp }
 func getTestPrecompile(precompileAddr common.Address) RunStatefulPrecompileFunc {
 	log.Info("Reached 2 1")
 	return func(evm PrecompileAccessibleState, callerAddr common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
-		if remainingGas, err = deductGas(suppliedGas, XChainECRecoverCost); err != nil {
-			return nil, 0, err
-		}
+		//if remainingGas, err = deductGas(suppliedGas, XChainECRecoverCost); err != nil {
+			//return nil, 0, err
+		//}
 
-		input = common.RightPadBytes(input, ecRecoverInputLength)
+		//input = common.RightPadBytes(input, ecRecoverInputLength)
 
 		// "input" is (hash, v, r, s), each 32 bytes
 		// but for ecrecover we want (r, s, v)
