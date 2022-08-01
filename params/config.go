@@ -172,7 +172,7 @@ func (c *ChainConfig) String() string {
 		string(networkUpgradesBytes),
 		string(precompileUpgradeBytes),
 		string(upgradeConfigBytes),
-	    c.TestPrecompileConfig,
+		c.TestPrecompileConfig,
 	)
 }
 
