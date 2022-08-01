@@ -21,7 +21,7 @@ const (
 	contractNativeMinterKey
 	txAllowListKey
 	feeManagerKey
-    testPrecompileKey
+	testPrecompileKey
 )
 
 var (
