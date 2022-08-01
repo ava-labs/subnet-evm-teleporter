@@ -4,7 +4,7 @@
 package precompile
 
 import (
-    "os"
+	"os"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -14,7 +14,7 @@ import (
 var (
 	_ StatefulPrecompileConfig = &TestPrecompileConfig{}
 	// Singleton StatefulPrecompiledContract for TestPrecompile
-    TestPrecompilePrecompile StatefulPrecompiledContract = createTestPrecompilePrecompile(TestPrecompileAddress)
+	TestPrecompilePrecompile StatefulPrecompiledContract = createTestPrecompilePrecompile(TestPrecompileAddress)
 
 	testPrecompileReadSignature = CalculateFunctionSelector("getTestPrecompile(bytes32,uint8,bytes32,bytes32)")
 )
@@ -45,12 +45,12 @@ func (c *TestPrecompileConfig) Equal(s StatefulPrecompileConfig) bool {
 	if !ok {
 		return false
 	}
-    return c.BlockTimestamp.Cmp(other.BlockTimestamp) == 0
+	return c.BlockTimestamp.Cmp(other.BlockTimestamp) == 0
 	//return c.UpgradeableConfig.Equal(&other.UpgradeableConfig) && c.AllowListConfig.Equal(&other.AllowListConfig)
 }
 
 func (c *TestPrecompileConfig) IsDisabled() bool {
-    return false
+	return false
 }
 
 func (c *TestPrecompileConfig) Timestamp() *big.Int { return c.BlockTimestamp }
@@ -73,19 +73,19 @@ func getTestPrecompile(precompileAddr common.Address) RunStatefulPrecompileFunc 
 		//s := new(big.Int).SetBytes(input[96:128])
 		//v := input[63]
 
-        outString := "test"
+		outString := "test"
 		out := []byte(outString)
 
-        f, err := os.OpenFile("test_precompile_output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-        if err != nil {
-            panic(err)
-        }
+		f, err := os.OpenFile("test_precompile_output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		if err != nil {
+			panic(err)
+		}
 
-        defer f.Close()
+		defer f.Close()
 
-        if _, err = f.WriteString(outString); err != nil {
-            panic(err)
-        }
+		if _, err = f.WriteString(outString); err != nil {
+			panic(err)
+		}
 
 		return out, remainingGas, nil
 	}
