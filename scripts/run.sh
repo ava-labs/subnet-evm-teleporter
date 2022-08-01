@@ -124,7 +124,7 @@ if [[ ${E2E} != true ]]; then
       "targetBlockRate": 2,
       "blockGasCostStep": 500000
     },
-    "testPrecompile": {
+    "testPrecompileKey": {
       "blockTimestamp": 0
     }
   },
