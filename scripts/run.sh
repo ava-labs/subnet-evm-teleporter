@@ -124,10 +124,7 @@ if [[ ${E2E} != true ]]; then
       "targetBlockRate": 2,
       "blockGasCostStep": 500000
     },
-    "testPrecompileKey": {
-      "blockTimestamp": 0
-    },
-    "contractDeployerAllowListConfig": {
+    "teleporterContractDeployerAllowListConfig": {
       "blockTimestamp": 0,
       "adminAddresses": ["0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"]
     }

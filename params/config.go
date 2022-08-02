@@ -233,6 +233,12 @@ func (c *ChainConfig) IsContractDeployerAllowList(blockTimestamp *big.Int) bool 
 	return config != nil && !config.Disable
 }
 
+// IsTeleporterContractDeployerAllowList returns whether [blockTimestamp] is either equal to the TeleporterContractDeployerAllowList fork block timestamp or greater.
+func (c *ChainConfig) IsTeleporterContractDeployerAllowList(blockTimestamp *big.Int) bool {
+	config := c.GetTeleporterContractDeployerAllowListConfig(blockTimestamp)
+	return config != nil && !config.Disable
+}
+
 // IsContractNativeMinter returns whether [blockTimestamp] is either equal to the NativeMinter fork block timestamp or greater.
 func (c *ChainConfig) IsContractNativeMinter(blockTimestamp *big.Int) bool {
 	config := c.GetContractNativeMinterConfig(blockTimestamp)
@@ -484,11 +490,12 @@ type Rules struct {
 	IsSubnetEVM bool
 
 	// Optional stateful precompile rules
-	IsContractDeployerAllowListEnabled bool
-	IsContractNativeMinterEnabled      bool
-	IsTxAllowListEnabled               bool
-	IsFeeConfigManagerEnabled          bool
-	IsTestPrecompileEnabled            bool
+	IsContractDeployerAllowListEnabled    bool
+	IsContractNativeMinterEnabled         bool
+	IsTxAllowListEnabled                  bool
+	IsFeeConfigManagerEnabled             bool
+	IsTestPrecompileEnabled               bool
+	IsTeleporterContractDeployerAllowList bool
 
 	// Precompiles maps addresses to stateful precompiled contracts that are enabled
 	// for this rule set.
@@ -527,6 +534,7 @@ func (c *ChainConfig) AvalancheRules(blockNum, blockTimestamp *big.Int) Rules {
 	rules.IsTxAllowListEnabled = c.IsTxAllowList(blockTimestamp)
 	rules.IsFeeConfigManagerEnabled = c.IsFeeConfigManager(blockTimestamp)
 	rules.IsTestPrecompileEnabled = c.IsTestPrecompile(blockTimestamp)
+	rules.IsTeleporterContractDeployerAllowList = c.IsTeleporterContractDeployerAllowList(blockTimestamp)
 
 	// Initialize the stateful precompiles that should be enabled at [blockTimestamp].
 	rules.Precompiles = make(map[common.Address]precompile.StatefulPrecompiledContract)

@@ -22,21 +22,23 @@ const (
 	txAllowListKey
 	feeManagerKey
 	testPrecompileKey
+	teleporterContractDeployerAllowListKey
 )
 
 var (
-	precompileKeys = []precompileKey{contractDeployerAllowListKey, contractNativeMinterKey, txAllowListKey, feeManagerKey, testPrecompileKey}
+	precompileKeys = []precompileKey{contractDeployerAllowListKey, contractNativeMinterKey, txAllowListKey, feeManagerKey, testPrecompileKey, teleporterContractDeployerAllowListKey}
 )
 
 // PrecompileUpgrade is a helper struct embedded in UpgradeConfig, representing
 // each of the possible stateful precompile types that can be activated
 // as a network upgrade.
 type PrecompileUpgrade struct {
-	ContractDeployerAllowListConfig *precompile.ContractDeployerAllowListConfig `json:"contractDeployerAllowListConfig,omitempty"` // Config for the contract deployer allow list precompile
-	ContractNativeMinterConfig      *precompile.ContractNativeMinterConfig      `json:"contractNativeMinterConfig,omitempty"`      // Config for the native minter precompile
-	TxAllowListConfig               *precompile.TxAllowListConfig               `json:"txAllowListConfig,omitempty"`               // Config for the tx allow list precompile
-	FeeManagerConfig                *precompile.FeeConfigManagerConfig          `json:"feeManagerConfig,omitempty"`                // Config for the fee manager precompile
-	TestPrecompileConfig            *precompile.TestPrecompileConfig            `json:"testPrecompileConfig,omitempty"`            // Config for the test precompile
+	ContractDeployerAllowListConfig           *precompile.ContractDeployerAllowListConfig           `json:"contractDeployerAllowListConfig,omitempty"`           // Config for the contract deployer allow list precompile
+	ContractNativeMinterConfig                *precompile.ContractNativeMinterConfig                `json:"contractNativeMinterConfig,omitempty"`                // Config for the native minter precompile
+	TxAllowListConfig                         *precompile.TxAllowListConfig                         `json:"txAllowListConfig,omitempty"`                         // Config for the tx allow list precompile
+	FeeManagerConfig                          *precompile.FeeConfigManagerConfig                    `json:"feeManagerConfig,omitempty"`                          // Config for the fee manager precompile
+	TestPrecompileConfig                      *precompile.TestPrecompileConfig                      `json:"testPrecompileConfig,omitempty"`                      // Config for the test precompile
+	TeleporterContractDeployerAllowListConfig *precompile.TeleporterContractDeployerAllowListConfig `json:"teleporterContractDeployerAllowListConfig,omitempty"` // Config for the teleporter contract deployer allow list precompile
 }
 
 func (p *PrecompileUpgrade) getByKey(key precompileKey) (precompile.StatefulPrecompileConfig, bool) {
@@ -51,6 +53,8 @@ func (p *PrecompileUpgrade) getByKey(key precompileKey) (precompile.StatefulPrec
 		return p.FeeManagerConfig, p.FeeManagerConfig != nil
 	case testPrecompileKey:
 		return p.TestPrecompileConfig, p.TestPrecompileConfig != nil
+	case teleporterContractDeployerAllowListKey:
+		return p.TeleporterContractDeployerAllowListConfig, p.TeleporterContractDeployerAllowListConfig != nil
 	default:
 		panic(fmt.Sprintf("unknown upgrade key: %v", key))
 	}
@@ -165,6 +169,15 @@ func (c *ChainConfig) getActivatingPrecompileConfigs(from *big.Int, to *big.Int,
 func (c *ChainConfig) GetContractDeployerAllowListConfig(blockTimestamp *big.Int) *precompile.ContractDeployerAllowListConfig {
 	if val := c.getActivePrecompileConfig(blockTimestamp, contractDeployerAllowListKey, c.PrecompileUpgrades); val != nil {
 		return val.(*precompile.ContractDeployerAllowListConfig)
+	}
+	return nil
+}
+
+// GetTeleporterContractDeployerAllowListConfig returns the latest forked TeleporterContractDeployerAllowListConfig
+// specified by [c] or nil if it was never enabled.
+func (c *ChainConfig) GetTeleporterContractDeployerAllowListConfig(blockTimestamp *big.Int) *precompile.TeleporterContractDeployerAllowListConfig {
+	if val := c.getActivePrecompileConfig(blockTimestamp, teleporterContractDeployerAllowListKey, c.PrecompileUpgrades); val != nil {
+		return val.(*precompile.TeleporterContractDeployerAllowListConfig)
 	}
 	return nil
 }

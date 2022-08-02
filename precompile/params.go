@@ -36,11 +36,12 @@ const (
 // that their own modifications do not conflict with stateful precompiles that may be added to subnet-evm
 // in the future.
 var (
-	ContractDeployerAllowListAddress = common.HexToAddress("0x0200000000000000000000000000000000000000")
-	ContractNativeMinterAddress      = common.HexToAddress("0x0200000000000000000000000000000000000001")
-	TxAllowListAddress               = common.HexToAddress("0x0200000000000000000000000000000000000002")
-	FeeConfigManagerAddress          = common.HexToAddress("0x0200000000000000000000000000000000000003")
-	TestPrecompileAddress            = common.HexToAddress("0x0300000000000000000000000000000000000000")
+	ContractDeployerAllowListAddress           = common.HexToAddress("0x0200000000000000000000000000000000000000")
+	ContractNativeMinterAddress                = common.HexToAddress("0x0200000000000000000000000000000000000001")
+	TxAllowListAddress                         = common.HexToAddress("0x0200000000000000000000000000000000000002")
+	FeeConfigManagerAddress                    = common.HexToAddress("0x0200000000000000000000000000000000000003")
+	TestPrecompileAddress                      = common.HexToAddress("0x0300000000000000000000000000000000000000")
+	TeleporterContractDeployerAllowListAddress = common.HexToAddress("0x0300000000000000000000000000000000000001")
 
 	UsedAddresses = []common.Address{
 		ContractDeployerAllowListAddress,
@@ -48,6 +49,7 @@ var (
 		TxAllowListAddress,
 		FeeConfigManagerAddress,
 		TestPrecompileAddress,
+		TeleporterContractDeployerAllowListAddress,
 	}
 	reservedRanges = []AddressRange{
 		{
