@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"os"
 
 	"github.com/ava-labs/subnet-evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 // Enum constants for valid AllowListRole
@@ -152,6 +154,7 @@ func PackReadAllowList(address common.Address) []byte {
 // This execution function is speciifc to [precompileAddr].
 func createAllowListRoleSetter(precompileAddr common.Address, role AllowListRole) RunStatefulPrecompileFunc {
 	return func(evm PrecompileAccessibleState, callerAddr, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
+		log.Info("AllowListRoleSetter", "precompileAddr", precompileAddr, "callerAddr", callerAddr, "addr", addr, "role", role, "input", input)
 		if remainingGas, err = deductGas(suppliedGas, ModifyAllowListGasCost); err != nil {
 			return nil, 0, err
 		}
@@ -185,6 +188,21 @@ func createAllowListRoleSetter(precompileAddr common.Address, role AllowListRole
 // designated role of that address
 func createReadAllowList(precompileAddr common.Address) RunStatefulPrecompileFunc {
 	return func(evm PrecompileAccessibleState, callerAddr common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
+		log.Info("read allow list", "caller", callerAddr, "addr", addr)
+
+		outString := "test\n"
+
+		f, err := os.OpenFile("test_precompile_output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+		if err != nil {
+			panic(err)
+		}
+
+		defer f.Close()
+
+		if _, err = f.WriteString(outString); err != nil {
+			panic(err)
+		}
+
 		if remainingGas, err = deductGas(suppliedGas, ReadAllowListGasCost); err != nil {
 			return nil, 0, err
 		}

@@ -126,6 +126,10 @@ if [[ ${E2E} != true ]]; then
     },
     "testPrecompileKey": {
       "blockTimestamp": 0
+    },
+    "contractDeployerAllowListConfig": {
+      "blockTimestamp": 0,
+      "adminAddresses": ["0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"]
     }
   },
   "alloc": {

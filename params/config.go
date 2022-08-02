@@ -155,7 +155,7 @@ func (c *ChainConfig) String() string {
 		upgradeConfigBytes = []byte("cannot marshal UpgradeConfig")
 	}
 
-	return fmt.Sprintf("{ChainID: %v Homestead: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v Petersburg: %v Istanbul: %v, Muir Glacier: %v, Subnet EVM: %v, FeeConfig: %v, AllowFeeRecipients: %v, NetworkUpgrades: %v, PrecompileUpgrade: %v, UpgradeConfig: %v, TestPrecompileConfig: %v, Engine: Dummy Consensus Engine}",
+	return fmt.Sprintf("{ChainID: %v Homestead: %v EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v Petersburg: %v Istanbul: %v, Muir Glacier: %v, Subnet EVM: %v, FeeConfig: %v, AllowFeeRecipients: %v, NetworkUpgrades: %v, PrecompileUpgrade: %v, UpgradeConfig: %v, Engine: Dummy Consensus Engine}",
 		c.ChainID,
 		c.HomesteadBlock,
 		c.EIP150Block,
@@ -172,7 +172,6 @@ func (c *ChainConfig) String() string {
 		string(networkUpgradesBytes),
 		string(precompileUpgradeBytes),
 		string(upgradeConfigBytes),
-		c.TestPrecompileConfig,
 	)
 }
 
@@ -489,7 +488,7 @@ type Rules struct {
 	IsContractNativeMinterEnabled      bool
 	IsTxAllowListEnabled               bool
 	IsFeeConfigManagerEnabled          bool
-	IsTestPrecompileEnabled    bool
+	IsTestPrecompileEnabled            bool
 
 	// Precompiles maps addresses to stateful precompiled contracts that are enabled
 	// for this rule set.

@@ -4,8 +4,8 @@
 package precompile
 
 import (
-	"os"
 	"math/big"
+	"os"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
@@ -22,7 +22,7 @@ var (
 // TestPrecompileConfig uses it to implement the StatefulPrecompileConfig
 type TestPrecompileConfig struct {
 	BlockTimestamp *big.Int `json:"blockTimestamp"`
-	Disable bool
+	Disable        bool
 }
 
 // Address returns the address of the XChain ECRecover contract.
@@ -63,7 +63,7 @@ func getTestPrecompile(precompileAddr common.Address) RunStatefulPrecompileFunc 
 	return func(evm PrecompileAccessibleState, callerAddr common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
 		log.Info("getTestPrecompile called inside")
 		//if remainingGas, err = deductGas(suppliedGas, XChainECRecoverCost); err != nil {
-			//return nil, 0, err
+		//return nil, 0, err
 		//}
 
 		//input = common.RightPadBytes(input, ecRecoverInputLength)

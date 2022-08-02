@@ -18,7 +18,6 @@ const (
 	ReadAllowListGasCost   = readGasCostPerSlot
 
 	MintGasCost = 30_000
-	XChainECRecoverCost = 10_000
 
 	SetFeeConfigGasCost     = writeGasCostPerSlot * (numFeeConfigField + 1) // plus one for setting last changed at
 	GetFeeConfigGasCost     = readGasCostPerSlot * numFeeConfigField
