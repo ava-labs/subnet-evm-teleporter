@@ -251,11 +251,6 @@ func (c *ChainConfig) IsTxAllowList(blockTimestamp *big.Int) bool {
 	return config != nil && !config.Disable
 }
 
-func (c *ChainConfig) IsTestPrecompile(blockTimestamp *big.Int) bool {
-	config := c.GetTestPrecompileConfig(blockTimestamp)
-	return config != nil && !config.Disable
-}
-
 // IsFeeConfigManager returns whether [blockTimestamp] is either equal to the FeeConfigManager fork block timestamp or greater.
 func (c *ChainConfig) IsFeeConfigManager(blockTimestamp *big.Int) bool {
 	config := c.GetFeeConfigManagerConfig(blockTimestamp)
@@ -494,7 +489,6 @@ type Rules struct {
 	IsContractNativeMinterEnabled         bool
 	IsTxAllowListEnabled                  bool
 	IsFeeConfigManagerEnabled             bool
-	IsTestPrecompileEnabled               bool
 	IsTeleporterContractDeployerAllowList bool
 
 	// Precompiles maps addresses to stateful precompiled contracts that are enabled
@@ -533,7 +527,6 @@ func (c *ChainConfig) AvalancheRules(blockNum, blockTimestamp *big.Int) Rules {
 	rules.IsContractNativeMinterEnabled = c.IsContractNativeMinter(blockTimestamp)
 	rules.IsTxAllowListEnabled = c.IsTxAllowList(blockTimestamp)
 	rules.IsFeeConfigManagerEnabled = c.IsFeeConfigManager(blockTimestamp)
-	rules.IsTestPrecompileEnabled = c.IsTestPrecompile(blockTimestamp)
 	rules.IsTeleporterContractDeployerAllowList = c.IsTeleporterContractDeployerAllowList(blockTimestamp)
 
 	// Initialize the stateful precompiles that should be enabled at [blockTimestamp].
