@@ -185,6 +185,13 @@ func createAllowListRoleSetter(precompileAddr common.Address, role AllowListRole
 // designated role of that address
 func createReadAllowList(precompileAddr common.Address) RunStatefulPrecompileFunc {
 	return func(evm PrecompileAccessibleState, callerAddr common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
+		if remainingGas, err = deductGas(suppliedGas, ReadAllowListGasCost); err != nil {
+			return nil, 0, err
+		}
+
+		if len(input) != allowListInputLen {
+			return nil, remainingGas, fmt.Errorf("invalid input length for read allow list: %d", len(input))
+		}
 		readAddress := common.BytesToAddress(input)
 		role := getAllowListStatus(evm.GetStateDB(), precompileAddr, readAddress)
 		roleBytes := common.Hash(role).Bytes()
