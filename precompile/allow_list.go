@@ -192,6 +192,7 @@ func createReadAllowList(precompileAddr common.Address) RunStatefulPrecompileFun
 		if len(input) != allowListInputLen {
 			return nil, remainingGas, fmt.Errorf("invalid input length for read allow list: %d", len(input))
 		}
+
 		readAddress := common.BytesToAddress(input)
 		role := getAllowListStatus(evm.GetStateDB(), precompileAddr, readAddress)
 		roleBytes := common.Hash(role).Bytes()
