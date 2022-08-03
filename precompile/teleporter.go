@@ -76,36 +76,6 @@ func teleporterSetAllowListRole(stateDB StateDB, precompileAddr, address common.
 	stateDB.SetState(precompileAddr, addressKey, common.Hash(role))
 }
 
-// PackModifyAllowList packs [address] and [role] into the appropriate arguments for modifying the allow list.
-// Note: [role] is not packed in the input value returned, but is instead used as a selector for the function
-// selector that should be encoded in the input.
-func TeleporterPackModifyAllowList(address common.Address, role TeleporterAllowListRole) ([]byte, error) {
-	// function selector (4 bytes) + hash for address
-	input := make([]byte, 0, selectorLen+common.HashLength)
-
-	switch role {
-	case TeleporterAllowListAdmin:
-		input = append(input, setAdminSignature...)
-	case TeleporterAllowListEnabled:
-		input = append(input, setEnabledSignature...)
-	case TeleporterAllowListNoRole:
-		input = append(input, setNoneSignature...)
-	default:
-		return nil, fmt.Errorf("cannot pack modify list input with invalid role: %s", role)
-	}
-
-	input = append(input, address.Hash().Bytes()...)
-	return input, nil
-}
-
-// PackReadAllowList packs [address] into the input data to the read allow list function
-func TeleporterPackReadAllowList(address common.Address) []byte {
-	input := make([]byte, 0, selectorLen+common.HashLength)
-	input = append(input, readAllowListSignature...)
-	input = append(input, address.Hash().Bytes()...)
-	return input
-}
-
 // createReadAllowList returns an execution function that reads the allow list for the given [precompileAddr].
 // The execution function parses the input into a single address and returns the 32 byte hash that specifies the
 // designated role of that address
@@ -211,17 +181,4 @@ func (c *TeleporterConfig) Equal(s StatefulPrecompileConfig) bool {
 		return false
 	}
 	return c.UpgradeableConfig.Equal(&other.UpgradeableConfig) && c.TeleporterAllowListConfig.Equal(&other.TeleporterAllowListConfig)
-}
-
-// GetContractDeployerAllowListStatus returns the role of [address] for the contract deployer
-// allow list.
-func GetTeleporterStatus(stateDB StateDB, address common.Address) TeleporterAllowListRole {
-	return teleporterGetAllowListStatus(stateDB, TeleporterAddress, address)
-}
-
-// SetContractDeployerAllowListStatus sets the permissions of [address] to [role] for the
-// contract deployer allow list.
-// assumes [role] has already been verified as valid.
-func SetTeleporterStatus(stateDB StateDB, address common.Address, role TeleporterAllowListRole) {
-	teleporterSetAllowListRole(stateDB, TeleporterAddress, address, role)
 }
