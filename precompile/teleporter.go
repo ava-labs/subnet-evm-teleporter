@@ -9,7 +9,6 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/ava-labs/subnet-evm/vmerrs"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
 )
@@ -23,10 +22,7 @@ var (
 	TeleporterAllowListAdmin   TeleporterAllowListRole = TeleporterAllowListRole(common.BigToHash(big.NewInt(2))) // Admin - allowed to modify both the admin and deployer list as well as deploy contracts
 
 	// AllowList function signatures
-	teleporterSetAdminSignature      = CalculateFunctionSelector("setAdmin(address)")
-	teleporterSetEnabledSignature    = CalculateFunctionSelector("setEnabled(address)")
-	teleporterSetNoneSignature       = CalculateFunctionSelector("setNone(address)")
-	teleporterReadAllowListSignature = CalculateFunctionSelector("readAllowList(address)")
+	testFunctionSignature = CalculateFunctionSelector("testFunction(address)")
 	// Error returned when an invalid write is attempted
 	TeleporterErrCannotModifyAllowList = errors.New("non-admin cannot modify allow list")
 
@@ -150,47 +146,14 @@ func TeleporterPackReadAllowList(address common.Address) []byte {
 	return input
 }
 
-// createAllowListRoleSetter returns an execution function for setting the allow list status of the input address argument to [role].
-// This execution function is speciifc to [precompileAddr].
-func teleporterCreateAllowListRoleSetter(precompileAddr common.Address, role TeleporterAllowListRole) RunStatefulPrecompileFunc {
-	return func(evm PrecompileAccessibleState, callerAddr, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
-		log.Info("AllowListRoleSetter", "precompileAddr", precompileAddr, "callerAddr", callerAddr, "addr", addr, "role", role, "input", input)
-		if remainingGas, err = deductGas(suppliedGas, ModifyAllowListGasCost); err != nil {
-			return nil, 0, err
-		}
-
-		if len(input) != allowListInputLen {
-			return nil, remainingGas, fmt.Errorf("invalid input length for modifying allow list: %d", len(input))
-		}
-
-		modifyAddress := common.BytesToAddress(input)
-
-		if readOnly {
-			return nil, remainingGas, vmerrs.ErrWriteProtection
-		}
-
-		stateDB := evm.GetStateDB()
-
-		// Verify that the caller is in the allow list and therefore has the right to modify it
-		callerStatus := teleporterGetAllowListStatus(stateDB, precompileAddr, callerAddr)
-		if !callerStatus.IsAdmin() {
-			return nil, remainingGas, fmt.Errorf("%w: %s", ErrCannotModifyAllowList, callerAddr)
-		}
-
-		teleporterSetAllowListRole(stateDB, precompileAddr, modifyAddress, role)
-		// Return an empty output and the remaining gas
-		return []byte{}, remainingGas, nil
-	}
-}
-
 // createReadAllowList returns an execution function that reads the allow list for the given [precompileAddr].
 // The execution function parses the input into a single address and returns the 32 byte hash that specifies the
 // designated role of that address
-func teleporterCreateReadAllowList(precompileAddr common.Address) RunStatefulPrecompileFunc {
+func createTestFunction(precompileAddr common.Address) RunStatefulPrecompileFunc {
 	return func(evm PrecompileAccessibleState, callerAddr common.Address, addr common.Address, input []byte, suppliedGas uint64, readOnly bool) (ret []byte, remainingGas uint64, err error) {
-		log.Info("read allow list", "caller", callerAddr, "addr", addr)
+		log.Info("testFunction", "caller", callerAddr, "addr", addr)
 
-		outString := "test\n"
+		outString := "test 1\n"
 
 		f, err := os.OpenFile("test_precompile_output.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 		if err != nil {
@@ -227,12 +190,9 @@ func teleporterCreateAllowListPrecompile(precompileAddr common.Address) Stateful
 }
 
 func teleporterCreateAllowListFunctions(precompileAddr common.Address) []*statefulPrecompileFunction {
-	setAdmin := newStatefulPrecompileFunction(setAdminSignature, teleporterCreateAllowListRoleSetter(precompileAddr, TeleporterAllowListAdmin))
-	setEnabled := newStatefulPrecompileFunction(setEnabledSignature, teleporterCreateAllowListRoleSetter(precompileAddr, TeleporterAllowListEnabled))
-	setNone := newStatefulPrecompileFunction(setNoneSignature, teleporterCreateAllowListRoleSetter(precompileAddr, TeleporterAllowListNoRole))
-	read := newStatefulPrecompileFunction(readAllowListSignature, teleporterCreateReadAllowList(precompileAddr))
+	read := newStatefulPrecompileFunction(testFunctionSignature, createTestFunction(precompileAddr))
 
-	return []*statefulPrecompileFunction{setAdmin, setEnabled, setNone, read}
+	return []*statefulPrecompileFunction{read}
 }
 
 var (
