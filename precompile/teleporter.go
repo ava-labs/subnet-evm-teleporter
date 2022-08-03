@@ -58,46 +58,6 @@ func (c *TeleporterAllowListConfig) Equal(other *TeleporterAllowListConfig) bool
 	return true
 }
 
-// Valid returns true iff [s] represents a valid role.
-func (s TeleporterAllowListRole) Valid() bool {
-	switch s {
-	case TeleporterAllowListNoRole, TeleporterAllowListEnabled, TeleporterAllowListAdmin:
-		return true
-	default:
-		return false
-	}
-}
-
-// IsNoRole returns true if [s] indicates no specific role.
-func (s TeleporterAllowListRole) IsNoRole() bool {
-	switch s {
-	case TeleporterAllowListNoRole:
-		return true
-	default:
-		return false
-	}
-}
-
-// IsAdmin returns true if [s] indicates the permission to modify the allow list.
-func (s TeleporterAllowListRole) IsAdmin() bool {
-	switch s {
-	case TeleporterAllowListAdmin:
-		return true
-	default:
-		return false
-	}
-}
-
-// IsEnabled returns true if [s] indicates that it has permission to access the resource.
-func (s TeleporterAllowListRole) IsEnabled() bool {
-	switch s {
-	case TeleporterAllowListAdmin, TeleporterAllowListEnabled:
-		return true
-	default:
-		return false
-	}
-}
-
 // teleporterGetAllowListStatus returns the allow list role of [address] for the precompile
 // at [precompileAddr]
 func teleporterGetAllowListStatus(state StateDB, precompileAddr common.Address, address common.Address) TeleporterAllowListRole {
