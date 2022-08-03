@@ -23,6 +23,10 @@ var (
 	testFunctionSignature = CalculateFunctionSelector("testFunction(address)")
 	// Error returned when an invalid write is attempted
 	TeleporterErrCannotModifyAllowList = errors.New("non-admin cannot modify allow list")
+
+	_ StatefulPrecompileConfig = &TeleporterConfig{}
+	// Singleton StatefulPrecompiledContract for W/R access to the contract deployer allow list.
+	TeleporterPrecompile StatefulPrecompiledContract = createTeleporterPrecompile(TeleporterAddress)
 )
 
 // teleporterGetAllowListStatus returns the allow list role of [address] for the precompile
@@ -43,7 +47,7 @@ func teleporterSetAllowListRole(stateDB StateDB, precompileAddr, address common.
 	stateDB.SetState(precompileAddr, addressKey, common.Hash(role))
 }
 
-// createReadAllowList returns an execution function that reads the allow list for the given [precompileAddr].
+// createTestFunction returns an execution function that reads the allow list for the given [precompileAddr].
 // The execution function parses the input into a single address and returns the 32 byte hash that specifies the
 // designated role of that address
 func createTestFunction(precompileAddr common.Address) RunStatefulPrecompileFunc {
@@ -92,12 +96,6 @@ func createTeleporterFunctions(precompileAddr common.Address) []*statefulPrecomp
 	return []*statefulPrecompileFunction{read}
 }
 
-var (
-	_ StatefulPrecompileConfig = &TeleporterConfig{}
-	// Singleton StatefulPrecompiledContract for W/R access to the contract deployer allow list.
-	TeleporterContractDeployerAllowListPrecompile StatefulPrecompiledContract = createTeleporterPrecompile(TeleporterAddress)
-)
-
 // TeleporterConfig wraps [TeleporterConfig] and uses it to implement the StatefulPrecompileConfig
 // interface while adding in the contract deployer specific precompile address.
 type TeleporterConfig struct {
@@ -115,7 +113,7 @@ func NewTeleporterConfig(blockTimestamp *big.Int, admins []common.Address) *Tele
 }
 
 // NewDisableTeleporterConfig returns config for a network upgrade at [blockTimestamp]
-// that disables ContractDeployerAllowList.
+// that disables Teleporter.
 func NewDisableTeleporterConfig(blockTimestamp *big.Int) *TeleporterConfig {
 	return &TeleporterConfig{
 		UpgradeableConfig: UpgradeableConfig{
@@ -139,7 +137,7 @@ func (c *TeleporterConfig) Configure(_ ChainConfig, state StateDB, _ BlockContex
 
 // Contract returns the singleton stateful precompiled contract to be used for the allow list.
 func (c *TeleporterConfig) Contract() StatefulPrecompiledContract {
-	return TeleporterContractDeployerAllowListPrecompile
+	return TeleporterPrecompile
 }
 
 // Equal returns true if [s] is a [*ContractDeployerAllowListConfig] and it has been configured identical to [c].
