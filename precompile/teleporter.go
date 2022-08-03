@@ -17,46 +17,13 @@ import (
 type TeleporterAllowListRole common.Hash
 
 var (
-	TeleporterAllowListNoRole  TeleporterAllowListRole = TeleporterAllowListRole(common.BigToHash(big.NewInt(0))) // No role assigned - this is equivalent to common.Hash{} and deletes the key from the DB when set
-	TeleporterAllowListEnabled TeleporterAllowListRole = TeleporterAllowListRole(common.BigToHash(big.NewInt(1))) // Deployers are allowed to create new contracts
-	TeleporterAllowListAdmin   TeleporterAllowListRole = TeleporterAllowListRole(common.BigToHash(big.NewInt(2))) // Admin - allowed to modify both the admin and deployer list as well as deploy contracts
+	TeleporterAllowListAdmin TeleporterAllowListRole = TeleporterAllowListRole(common.BigToHash(big.NewInt(2))) // Admin - allowed to modify both the admin and deployer list as well as deploy contracts
 
 	// AllowList function signatures
 	testFunctionSignature = CalculateFunctionSelector("testFunction(address)")
 	// Error returned when an invalid write is attempted
 	TeleporterErrCannotModifyAllowList = errors.New("non-admin cannot modify allow list")
-
-	teleporterAllowListInputLen = common.HashLength
 )
-
-// AllowListConfig specifies the initial set of allow list admins.
-type TeleporterAllowListConfig struct {
-	AllowListAdmins []common.Address `json:"adminAddresses"`
-}
-
-// Configure initializes the address space of [precompileAddr] by initializing the role of each of
-// the addresses in [AllowListAdmins].
-func (c *TeleporterAllowListConfig) Configure(state StateDB, precompileAddr common.Address) {
-	for _, adminAddr := range c.AllowListAdmins {
-		teleporterSetAllowListRole(state, precompileAddr, adminAddr, TeleporterAllowListAdmin)
-	}
-}
-
-// Equal returns true iff [other] has the same admins in the same order in its allow list.
-func (c *TeleporterAllowListConfig) Equal(other *TeleporterAllowListConfig) bool {
-	if other == nil {
-		return false
-	}
-	if len(c.AllowListAdmins) != len(other.AllowListAdmins) {
-		return false
-	}
-	for i, admin := range c.AllowListAdmins {
-		if admin != other.AllowListAdmins[i] {
-			return false
-		}
-	}
-	return true
-}
 
 // teleporterGetAllowListStatus returns the allow list role of [address] for the precompile
 // at [precompileAddr]
@@ -111,15 +78,15 @@ func createTestFunction(precompileAddr common.Address) RunStatefulPrecompileFunc
 	}
 }
 
-// createAllowListPrecompile returns a StatefulPrecompiledContract with R/W control of an allow list at [precompileAddr]
-func teleporterCreateAllowListPrecompile(precompileAddr common.Address) StatefulPrecompiledContract {
+// createTeleporterPrecompile returns a StatefulPrecompiledContract with R/W control of an allow list at [precompileAddr]
+func createTeleporterPrecompile(precompileAddr common.Address) StatefulPrecompiledContract {
 	// Construct the contract with no fallback function.
-	allowListFuncs := teleporterCreateAllowListFunctions(precompileAddr)
+	allowListFuncs := createTeleporterFunctions(precompileAddr)
 	contract := newStatefulPrecompileWithFunctionSelectors(nil, allowListFuncs)
 	return contract
 }
 
-func teleporterCreateAllowListFunctions(precompileAddr common.Address) []*statefulPrecompileFunction {
+func createTeleporterFunctions(precompileAddr common.Address) []*statefulPrecompileFunction {
 	read := newStatefulPrecompileFunction(testFunctionSignature, createTestFunction(precompileAddr))
 
 	return []*statefulPrecompileFunction{read}
@@ -128,13 +95,13 @@ func teleporterCreateAllowListFunctions(precompileAddr common.Address) []*statef
 var (
 	_ StatefulPrecompileConfig = &TeleporterConfig{}
 	// Singleton StatefulPrecompiledContract for W/R access to the contract deployer allow list.
-	TeleporterContractDeployerAllowListPrecompile StatefulPrecompiledContract = teleporterCreateAllowListPrecompile(TeleporterAddress)
+	TeleporterContractDeployerAllowListPrecompile StatefulPrecompiledContract = createTeleporterPrecompile(TeleporterAddress)
 )
 
-// TeleporterConfig wraps [TeleporterAllowListConfig] and uses it to implement the StatefulPrecompileConfig
+// TeleporterConfig wraps [TeleporterConfig] and uses it to implement the StatefulPrecompileConfig
 // interface while adding in the contract deployer specific precompile address.
 type TeleporterConfig struct {
-	TeleporterAllowListConfig
+	AllowListAdmins []common.Address `json:"adminAddresses"`
 	UpgradeableConfig
 }
 
@@ -142,8 +109,8 @@ type TeleporterConfig struct {
 // ContractDeployerAllowList with the given [admins] as members of the allowlist.
 func NewTeleporterConfig(blockTimestamp *big.Int, admins []common.Address) *TeleporterConfig {
 	return &TeleporterConfig{
-		TeleporterAllowListConfig: TeleporterAllowListConfig{AllowListAdmins: admins},
-		UpgradeableConfig:         UpgradeableConfig{BlockTimestamp: blockTimestamp},
+		AllowListAdmins:   admins,
+		UpgradeableConfig: UpgradeableConfig{BlockTimestamp: blockTimestamp},
 	}
 }
 
@@ -165,7 +132,9 @@ func (c *TeleporterConfig) Address() common.Address {
 
 // Configure configures [state] with the desired admins based on [c].
 func (c *TeleporterConfig) Configure(_ ChainConfig, state StateDB, _ BlockContext) {
-	c.TeleporterAllowListConfig.Configure(state, TeleporterAddress)
+	for _, adminAddr := range c.AllowListAdmins {
+		teleporterSetAllowListRole(state, TeleporterAddress, adminAddr, TeleporterAllowListAdmin)
+	}
 }
 
 // Contract returns the singleton stateful precompiled contract to be used for the allow list.
@@ -180,5 +149,16 @@ func (c *TeleporterConfig) Equal(s StatefulPrecompileConfig) bool {
 	if !ok {
 		return false
 	}
-	return c.UpgradeableConfig.Equal(&other.UpgradeableConfig) && c.TeleporterAllowListConfig.Equal(&other.TeleporterAllowListConfig)
+	if other == nil {
+		return false
+	}
+	if len(c.AllowListAdmins) != len(other.AllowListAdmins) {
+		return false
+	}
+	for i, admin := range c.AllowListAdmins {
+		if admin != other.AllowListAdmins[i] {
+			return false
+		}
+	}
+	return c.UpgradeableConfig.Equal(&other.UpgradeableConfig)
 }
