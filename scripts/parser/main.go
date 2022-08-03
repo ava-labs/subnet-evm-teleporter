@@ -11,6 +11,7 @@ import (
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/subnet-evm/tests/e2e/runner"
 	"github.com/ava-labs/subnet-evm/tests/e2e/utils"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/fatih/color"
 	"gopkg.in/yaml.v2"
 )
@@ -35,27 +36,27 @@ type output struct {
 	URIs     []string `yaml:"uris"`
 }
 
-func startSubnet(outputFile string, avalanchegoPath string, pluginDir string, grpc string, genesisPath string) {
+func startSubnet(outputFile string, avalanchegoPath string, pluginDir string, genesisPath string) {
+	// log the genesisPath to stdout
+	log.Info("startSubnet", "genesisPath", genesisPath)
 	// set vmid
-	b := make([]byte, 32)
+	bytes := make([]byte, 32)
 	vmName := "subnetevm"
-	copy(b, []byte(vmName))
+	copy(bytes, []byte(vmName))
 	var err error
-	vmId, err := ids.ToID(b)
+	vmId, err := ids.ToID(bytes)
 	if err != nil {
 		panic(err)
 	}
 
-	utils.SetOutputFile(outputFile)
-	utils.SetPluginDir(pluginDir)
-	err = runner.InitializeRunner(avalanchegoPath, grpc, "info")
-	if err != nil {
-		panic(err)
-	}
+	// Start subnet-evm A
+	// This cannot resolve relative paths for the genesis file
 	_, err = runner.StartNetwork(vmId, vmName, genesisPath, pluginDir)
 	if err != nil {
 		panic(err)
 	}
+
+	// Wait for A
 	blockchainId, logsDir, err := runner.WaitForCustomVm(vmId)
 	if err != nil {
 		panic(err)
@@ -106,13 +107,29 @@ func main() {
 	}
 
 	outputFile := os.Args[1]
-	chainId := os.Args[2]
+	//chainId := os.Args[2]
 	address := os.Args[3]
 	avagoPath := os.Args[4]
 	pluginDir := os.Args[5]
 	grpc := os.Args[6]
-	genesis := os.Args[7]
+	log.Info("main", "grpcval", grpc)
+	//genesis := os.Args[7]
 
-	startSubnet(outputFile, avagoPath, pluginDir, grpc, genesis)
-	parseMetamask(outputFile, chainId, address)
+	var err error
+	utils.SetOutputFile(outputFile)
+	utils.SetPluginDir(pluginDir)
+	err = runner.InitializeRunner(avagoPath, grpc, "info")
+	if err != nil {
+		panic(err)
+	}
+
+	genesisPathA := "./genesisA.json"
+	chainIdA := "99999"
+	startSubnet(outputFile, avagoPath, pluginDir, genesisPathA)
+	parseMetamask(outputFile, chainIdA, address)
+
+	genesisPathB := "./genesisB.json"
+	chainIdB := "99991"
+	startSubnet(outputFile, avagoPath, pluginDir, genesisPathB)
+	parseMetamask(outputFile, chainIdB, address)
 }
