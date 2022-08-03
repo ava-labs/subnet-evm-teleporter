@@ -221,7 +221,7 @@ func teleporterCreateReadAllowList(precompileAddr common.Address) RunStatefulPre
 // createAllowListPrecompile returns a StatefulPrecompiledContract with R/W control of an allow list at [precompileAddr]
 func teleporterCreateAllowListPrecompile(precompileAddr common.Address) StatefulPrecompiledContract {
 	// Construct the contract with no fallback function.
-	allowListFuncs := createAllowListFunctions(precompileAddr)
+	allowListFuncs := teleporterCreateAllowListFunctions(precompileAddr)
 	contract := newStatefulPrecompileWithFunctionSelectors(nil, allowListFuncs)
 	return contract
 }
@@ -238,7 +238,7 @@ func teleporterCreateAllowListFunctions(precompileAddr common.Address) []*statef
 var (
 	_ StatefulPrecompileConfig = &TeleporterConfig{}
 	// Singleton StatefulPrecompiledContract for W/R access to the contract deployer allow list.
-	TeleporterContractDeployerAllowListPrecompile StatefulPrecompiledContract = createAllowListPrecompile(TeleporterContractDeployerAllowListAddress)
+	TeleporterContractDeployerAllowListPrecompile StatefulPrecompiledContract = teleporterCreateAllowListPrecompile(TeleporterAddress)
 )
 
 // TeleporterConfig wraps [TeleporterAllowListConfig] and uses it to implement the StatefulPrecompileConfig
@@ -270,12 +270,12 @@ func NewDisableTeleporterConfig(blockTimestamp *big.Int) *TeleporterConfig {
 
 // Address returns the address of the contract deployer allow list.
 func (c *TeleporterConfig) Address() common.Address {
-	return TeleporterContractDeployerAllowListAddress
+	return TeleporterAddress
 }
 
 // Configure configures [state] with the desired admins based on [c].
 func (c *TeleporterConfig) Configure(_ ChainConfig, state StateDB, _ BlockContext) {
-	c.TeleporterAllowListConfig.Configure(state, TeleporterContractDeployerAllowListAddress)
+	c.TeleporterAllowListConfig.Configure(state, TeleporterAddress)
 }
 
 // Contract returns the singleton stateful precompiled contract to be used for the allow list.
@@ -296,12 +296,12 @@ func (c *TeleporterConfig) Equal(s StatefulPrecompileConfig) bool {
 // GetContractDeployerAllowListStatus returns the role of [address] for the contract deployer
 // allow list.
 func GetTeleporterStatus(stateDB StateDB, address common.Address) TeleporterAllowListRole {
-	return teleporterGetAllowListStatus(stateDB, TeleporterContractDeployerAllowListAddress, address)
+	return teleporterGetAllowListStatus(stateDB, TeleporterAddress, address)
 }
 
 // SetContractDeployerAllowListStatus sets the permissions of [address] to [role] for the
 // contract deployer allow list.
 // assumes [role] has already been verified as valid.
 func SetTeleporterStatus(stateDB StateDB, address common.Address, role TeleporterAllowListRole) {
-	teleporterSetAllowListRole(stateDB, TeleporterContractDeployerAllowListAddress, address, role)
+	teleporterSetAllowListRole(stateDB, TeleporterAddress, address, role)
 }
