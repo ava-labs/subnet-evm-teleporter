@@ -123,10 +123,6 @@ if [[ ${E2E} != true ]]; then
       "maxBlockGasCost": 10000000,
       "targetBlockRate": 2,
       "blockGasCostStep": 500000
-    },
-    "teleporterConfig": {
-      "blockTimestamp": 0,
-      "adminAddresses": ["0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC"]
     }
   },
   "alloc": {
