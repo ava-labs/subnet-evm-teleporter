@@ -233,6 +233,12 @@ func (c *ChainConfig) IsContractDeployerAllowList(blockTimestamp *big.Int) bool 
 	return config != nil && !config.Disable
 }
 
+// IsTeleporter returns whether [blockTimestamp] is either equal to the Teleporter fork block timestamp or greater.
+func (c *ChainConfig) IsTeleporter(blockTimestamp *big.Int) bool {
+	config := c.GetTeleporterConfig(blockTimestamp)
+	return config != nil && !config.Disable
+}
+
 // IsContractNativeMinter returns whether [blockTimestamp] is either equal to the NativeMinter fork block timestamp or greater.
 func (c *ChainConfig) IsContractNativeMinter(blockTimestamp *big.Int) bool {
 	config := c.GetContractNativeMinterConfig(blockTimestamp)
@@ -483,6 +489,7 @@ type Rules struct {
 	IsContractNativeMinterEnabled      bool
 	IsTxAllowListEnabled               bool
 	IsFeeConfigManagerEnabled          bool
+	IsTeleporter                       bool
 
 	// Precompiles maps addresses to stateful precompiled contracts that are enabled
 	// for this rule set.
@@ -520,6 +527,7 @@ func (c *ChainConfig) AvalancheRules(blockNum, blockTimestamp *big.Int) Rules {
 	rules.IsContractNativeMinterEnabled = c.IsContractNativeMinter(blockTimestamp)
 	rules.IsTxAllowListEnabled = c.IsTxAllowList(blockTimestamp)
 	rules.IsFeeConfigManagerEnabled = c.IsFeeConfigManager(blockTimestamp)
+	rules.IsTeleporter = c.IsTeleporter(blockTimestamp)
 
 	// Initialize the stateful precompiles that should be enabled at [blockTimestamp].
 	rules.Precompiles = make(map[common.Address]precompile.StatefulPrecompiledContract)
